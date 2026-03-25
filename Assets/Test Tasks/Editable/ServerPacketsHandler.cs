@@ -10,6 +10,10 @@ namespace TestTask.Editable
         {
             var clientLogInResponse = ServerMock.Instance.TryConnectClient(out var clientId);
             SendLoginResponse(clientLogInResponse, clientId);
+
+            // TODO: probably want this somewhere else since it gets received by the client faster before login response sometimes
+            if (clientLogInResponse == LoginResponse.Success)
+                SendMonsterStatusUpdate(ServerMock.Instance.ServerMobsManager.SpawnMonster());
         }
 
         #endregion
@@ -21,6 +25,19 @@ namespace TestTask.Editable
             {
                 packet.Write((int)response);
                 packet.Write(clientId);
+
+                ServerMock.Instance.PacketSenderServer.SendToClient(packet);
+            }
+        }
+
+        public static void SendMonsterStatusUpdate(MonsterData monsterData)
+        {
+            using (Packet packet = new Packet(2))
+            {
+                packet.Write(monsterData.MonsterId);
+                packet.Write((int)monsterData.MonsterType);
+                packet.Write((int)monsterData.MonsterMaxHealth);
+                packet.Write((int)monsterData.MonsterCurrentHealth);
 
                 ServerMock.Instance.PacketSenderServer.SendToClient(packet);
             }

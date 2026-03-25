@@ -15,6 +15,16 @@ namespace TestTask.Editable
 
             ClientManager.Instance.SetClientLogInStatus(responseCode, clientId);
         }
+
+        public static void MobDataReceived(Packet packet)
+        {
+            int monsterId = packet.ReadInt();
+            int monsterType = packet.ReadInt();
+            int monsterMaxHp = packet.ReadInt();
+            int monsterCurrentHp = packet.ReadInt();
+
+            ClientManager.Instance.ClientMobsManager.SpawnMonster(monsterId, monsterType, monsterMaxHp, monsterCurrentHp);
+        }
         #endregion
 
         #region Packet Senders
