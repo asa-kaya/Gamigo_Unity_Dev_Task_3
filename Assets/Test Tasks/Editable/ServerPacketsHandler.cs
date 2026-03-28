@@ -13,7 +13,18 @@ namespace TestTask.Editable
 
             // TODO: probably want this somewhere else since it gets received by the client faster before login response sometimes
             if (clientLogInResponse == LoginResponse.Success)
-                SendMonsterStatusUpdate(ServerMock.Instance.ServerMobsManager.SpawnMonster());
+                SendMonsterSpawnedResponse(ServerMock.Instance.ServerMobsManager.SpawnMonster());
+        }
+
+        public static void DamageMonsterRequest(Packet packet)
+        {
+            int monsterId = packet.ReadInt();
+            float damageAmount = packet.ReadFloat();
+            MonsterData monsterData = ServerMock.Instance.ServerMobsManager.ApplyDamageToMonster(monsterId, damageAmount);
+
+            // no need to send anything if a different monster has already spawned
+            if (monsterId == monsterData.MonsterId)
+                SendMonsterHealthChangedResponse(monsterData.MonsterId, monsterData.MonsterCurrentHealth);
         }
 
         #endregion
@@ -30,7 +41,7 @@ namespace TestTask.Editable
             }
         }
 
-        public static void SendMonsterStatusUpdate(MonsterData monsterData)
+        public static void SendMonsterSpawnedResponse(MonsterData monsterData)
         {
             using (Packet packet = new Packet(2))
             {
@@ -43,6 +54,16 @@ namespace TestTask.Editable
             }
         }
 
+        public static void SendMonsterHealthChangedResponse(int monsterId, float newHealth)
+        {
+            using (Packet packet = new Packet(3))
+            {
+                packet.Write(monsterId);
+                packet.Write(newHealth);
+
+                ServerMock.Instance.PacketSenderServer.SendToClient(packet);
+            }
+        }
         #endregion
     }
 }

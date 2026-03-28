@@ -10,6 +10,8 @@ namespace TestTask.Editable
     {
         [field: SerializeField] public MonsterData MonsterData { get; private set; }
 
+        public Action<MonsterData> MonsterStatusChanged;
+
         public ServerMobsManager()
         {
             MonsterData = SpawnMonster();
@@ -28,10 +30,22 @@ namespace TestTask.Editable
             return MonsterData;
         }
 
+        public MonsterData ApplyDamageToMonster(int id, float damageAmount)
+        {
+            if (MonsterData.MonsterId == id)
+            {
+                MonsterData.TakeDamage(damageAmount);
+            }
+
+            return MonsterData;
+        }
+
         public void OnMonsterDied()
         {
             MonsterData.MonsterDeath -= OnMonsterDied;
             MonsterData = SpawnMonster();
+
+            ServerPacketsHandler.SendMonsterSpawnedResponse(MonsterData);
         }
     }
 }  

@@ -1,8 +1,9 @@
+using System;
 using System.Collections.Generic;
 using TestTask.NonEditable;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 namespace TestTask.Editable
 {
@@ -27,10 +28,35 @@ namespace TestTask.Editable
             var monsterType = MonsterNameExtensions.MonsterTypeFromId(type);
 
             monster = new MonsterData(id, monsterType, maxHp, currentHp);
+            monster.MonsterDamaged += OnMonsterDamageTaken;
+            monster.MonsterDeath += OnMonsterDeath;
 
             UpdateMonsterVisuals();
 
             Debug.Log($"[Client] Monster spawned: id={id}; type={monsterType} HP={currentHp}/{maxHp}");
+        }
+
+        public void UpdateMonsterHealth(int monsterId, float newHp)
+        {
+            if (monster.MonsterId == monsterId)
+            {
+                // assume damage taken if new data has less health than current one
+                float damageTaken = monster.MonsterCurrentHealth - newHp;
+
+                if (damageTaken > 0)
+                    monster.TakeDamage(damageTaken);
+            }
+        }
+
+        private void OnMonsterDamageTaken(float damageAmount)
+        {
+            UpdateMonsterVisuals();
+        }
+
+        private void OnMonsterDeath()
+        {
+            // clean up and wait for server to send newly spawned monster data
+            monster = null;
         }
 
         private void UpdateMonsterVisuals()
@@ -51,6 +77,13 @@ namespace TestTask.Editable
             {
                 healthBar.gameObject.SetActive(false);
             }
+        }
+
+        public void DealDamageToMonster()
+        {
+            // make up a random number between 20-50% of monster's health
+            var damageAmount = Random.Range(monster.MonsterMaxHealth * 0.2f, monster.MonsterMaxHealth * 0.5f);
+            ClientPacketsHandler.SendDamageMonsterRequest(monster.MonsterId, damageAmount);
         }
     }
 }
