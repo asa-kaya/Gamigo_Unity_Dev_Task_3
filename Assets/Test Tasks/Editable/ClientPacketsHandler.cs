@@ -14,6 +14,10 @@ namespace TestTask.Editable
             int clientId = packet.ReadInt();
 
             ClientManager.Instance.SetClientLogInStatus(responseCode, clientId);
+
+            // still spawn monster if spawn data got received first
+            if (responseCode == 0)
+                ClientManager.Instance.ClientMobsManager.SpawnMonster();
         }
 
         public static void MonsterSpawnDataReceived(Packet packet)
@@ -23,7 +27,11 @@ namespace TestTask.Editable
             int monsterMaxHp = packet.ReadInt();
             int monsterCurrentHp = packet.ReadInt();
 
-            ClientManager.Instance.ClientMobsManager.SpawnMonster(monsterId, monsterType, monsterMaxHp, monsterCurrentHp);
+            ClientManager.Instance.ClientMobsManager.LoadMonsterData(monsterId, monsterType, monsterMaxHp, monsterCurrentHp);
+
+            // wait for login status response before spawning
+            if (ClientManager.Instance.ClientId != 0)
+                ClientManager.Instance.ClientMobsManager.SpawnMonster();
         }
 
         public static void MonsterHealthDataReceived(Packet packet)

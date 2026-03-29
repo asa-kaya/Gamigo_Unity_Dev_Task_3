@@ -11,8 +11,7 @@ namespace TestTask.Editable
         {
             var clientLogInResponse = ServerMock.Instance.TryConnectClient(out var clientId);
             SendLoginResponse(clientLogInResponse, clientId);
-
-            // TODO: probably want this somewhere else since it gets received by the client faster before login response sometimes
+            
             if (clientLogInResponse == LoginResponse.Success)
                 SendMonsterSpawnedResponse(ServerMock.Instance.ServerMobsManager.SpawnMonster());
         }

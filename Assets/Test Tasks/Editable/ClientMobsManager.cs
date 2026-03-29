@@ -23,17 +23,22 @@ namespace TestTask.Editable
                 monsterMap[sprite.name] = sprite;
         }
 
-        public void SpawnMonster(int id, int type, int maxHp, int currentHp)
+        public void LoadMonsterData(int id, int type, int maxHp, int currentHp)
         {
             var monsterType = MonsterNameExtensions.MonsterTypeFromId(type);
-
             monster = new MonsterData(id, monsterType, maxHp, currentHp);
+        }
+
+        public void SpawnMonster()
+        {
+            if (monster == null) return;
+
             monster.MonsterDamaged += OnMonsterDamageTaken;
             monster.MonsterDeath += OnMonsterDeath;
 
             UpdateMonsterVisuals();
 
-            Debug.Log($"[Client] Monster spawned: id={id}; type={monsterType} HP={currentHp}/{maxHp}");
+            Debug.Log($"[Client] Monster spawned: id={monster.MonsterId}; type={monster.MonsterType} HP={monster.MonsterCurrentHealth}/{monster.MonsterMaxHealth}");
         }
 
         public void UpdateMonsterHealth(int monsterId, float newHp)
