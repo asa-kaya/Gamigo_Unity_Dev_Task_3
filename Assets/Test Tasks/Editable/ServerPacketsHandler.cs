@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TestTask.NonEditable;
 using UnityEngine;
 
@@ -25,6 +26,25 @@ namespace TestTask.Editable
             // no need to send anything if a different monster has already spawned
             if (monsterId == monsterData.MonsterId)
                 SendMonsterHealthChangedResponse(monsterData.MonsterId, monsterData.MonsterCurrentHealth);
+        }
+
+        public static void ColorSetRequest(Packet packet)
+        {
+            // maybe return 5 - 10 random colors idk
+            int colorCount = Random.Range(5, 11);
+            List<Color32> colorSet = new List<Color32>(colorCount);
+            
+            for (int i = 0; i < colorCount; i++)
+            {
+                colorSet.Add(new Color32(
+                    (byte)Random.Range(0, 256),
+                    (byte)Random.Range(0, 256),
+                    (byte)Random.Range(0, 256),
+                    (byte)Random.Range(0, 256)
+                )); // generate random color
+            }
+
+            SendColorSetResponse(colorSet);
         }
 
         #endregion
@@ -60,6 +80,19 @@ namespace TestTask.Editable
             {
                 packet.Write(monsterId);
                 packet.Write(newHealth);
+
+                ServerMock.Instance.PacketSenderServer.SendToClient(packet);
+            }
+        }
+
+        public static void SendColorSetResponse(IList<Color32> colorSet)
+        {
+            using (Packet packet = new Packet(4))
+            {
+                packet.Write(colorSet.Count);
+
+                foreach (Color32 color in colorSet)
+                    packet.Write(color.ToInt());
 
                 ServerMock.Instance.PacketSenderServer.SendToClient(packet);
             }
