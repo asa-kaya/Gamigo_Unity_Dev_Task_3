@@ -81,6 +81,8 @@ namespace TestTask.Editable
 
         public void DealDamageToMonster()
         {
+            if (monster == null) return;
+
             // make up a random number between 20-50% of monster's health
             var damageAmount = Random.Range(monster.MonsterMaxHealth * 0.2f, monster.MonsterMaxHealth * 0.5f);
             ClientPacketsHandler.SendDamageMonsterRequest(monster.MonsterId, damageAmount);
