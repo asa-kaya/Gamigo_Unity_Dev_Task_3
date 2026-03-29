@@ -58,6 +58,8 @@ namespace TestTask.Editable
 
         public static void SendDamageMonsterRequest(int monsterId, float damageAmount)
         {
+            if (ClientManager.Instance.ClientId == 0) return;
+
             Packet packet = new Packet(2);
             packet.Write(monsterId);
             packet.Write(damageAmount);
@@ -66,6 +68,8 @@ namespace TestTask.Editable
 
         public static void SendNewColorSetRequest()
         {
+            if (ClientManager.Instance.ClientId == 0) return;
+            
             Packet packet = new Packet(3);
             ClientManager.Instance.PacketSenderClient.SendToServer(packet);
         }
