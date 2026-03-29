@@ -9,19 +9,9 @@ namespace TestTask.Editable
 {
     public class ClientMobsManager : MonoBehaviour
     {
-        [SerializeField] private Image monsterImage;
-        [SerializeField] private Slider healthBar;
-        [SerializeField] private Sprite[] monsterSprites;
-
-        private Dictionary<string, Sprite> monsterMap;
         private MonsterData monster;
 
-        private void Awake()
-        {
-            monsterMap = new Dictionary<string, Sprite>();
-            foreach (Sprite sprite in monsterSprites)
-                monsterMap[sprite.name] = sprite;
-        }
+        public static event Action<MonsterData> MonsterStatusUpdated;
 
         public void LoadMonsterData(int id, int type, int maxHp, int currentHp)
         {
@@ -36,7 +26,7 @@ namespace TestTask.Editable
             monster.MonsterDamaged += OnMonsterDamageTaken;
             monster.MonsterDeath += OnMonsterDeath;
 
-            UpdateMonsterVisuals();
+            MonsterStatusUpdated?.Invoke(monster);
 
             Debug.Log($"[Client] Monster spawned: id={monster.MonsterId}; type={monster.MonsterType} HP={monster.MonsterCurrentHealth}/{monster.MonsterMaxHealth}");
         }
@@ -55,33 +45,13 @@ namespace TestTask.Editable
 
         private void OnMonsterDamageTaken(float damageAmount)
         {
-            UpdateMonsterVisuals();
+            MonsterStatusUpdated?.Invoke(monster);
         }
 
         private void OnMonsterDeath()
         {
             // clean up and wait for server to send newly spawned monster data
             monster = null;
-        }
-
-        private void UpdateMonsterVisuals()
-        {
-            if (monster != null)
-            {
-                string typeKey = monster.MonsterType.ToFriendlyString();
-                if (monsterMap.ContainsKey(typeKey))
-                {
-                    monsterImage.sprite = monsterMap[typeKey];
-                    monsterImage.color = Color.white;
-                }
-                
-                healthBar.value = monster.MonsterCurrentHealth/monster.MonsterMaxHealth;
-                healthBar.gameObject.SetActive(true);
-            }
-            else
-            {
-                healthBar.gameObject.SetActive(false);
-            }
         }
 
         public void DealDamageToMonster()

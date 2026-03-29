@@ -1,16 +1,16 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace TestTask.Editable
 {
     public class ClientColors : MonoBehaviour
     {
-        [SerializeField] private RectTransform colorItemContainer;
-        [SerializeField] private Image colorItemTemplate;
+        private List<Color32> colors;
 
-        private List<Image> colorItems = new List<Image>();
+        public static event Action<IEnumerable<Color32>> ColorsChanged;
 
         public void RequestNewColorSet()
         {
@@ -19,25 +19,9 @@ namespace TestTask.Editable
 
         public void SetColors(IList<Color32> colorSet)
         {
-            ClearColors();
-
-            foreach (Color32 color in colorSet)
-            {
-                var colorItem = GameObject.Instantiate(colorItemTemplate, colorItemContainer);
-                colorItem.color = color;
-                colorItem.gameObject.SetActive(true);
-                colorItems.Add(colorItem);
-            }
-
+            colors = colorSet.ToList();
             LogColors(colorSet);
-        }
-
-        private void ClearColors()
-        {
-            foreach (Image colorItem in colorItems)
-                Destroy(colorItem.gameObject);
-            
-            colorItems = new List<Image>();
+            ColorsChanged?.Invoke(colors);
         }
 
         private void LogColors(IList<Color32> colorSet)

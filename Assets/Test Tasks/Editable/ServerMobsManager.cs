@@ -10,8 +10,6 @@ namespace TestTask.Editable
     {
         [field: SerializeField] public MonsterData MonsterData { get; private set; }
 
-        public Action<MonsterData> MonsterStatusChanged;
-
         public ServerMobsManager()
         {
             MonsterData = SpawnMonster();
